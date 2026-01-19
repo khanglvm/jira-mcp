@@ -1,0 +1,49 @@
+{
+    "name": "@lvmk/jira-mcp",
+    "version": "1.0.0",
+    "description": "MCP server providing Jira tools with basic authentication support for Jira Server v7.x",
+    "type": "module",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "bin": {
+        "jira-mcp": "dist/index.js"
+    },
+    "scripts": {
+        "build": "tsc",
+        "dev": "tsc --watch",
+        "start": "node dist/index.js",
+        "prepublishOnly": "npm run build",
+        "clean": "rm -rf dist"
+    },
+    "keywords": [
+        "mcp",
+        "jira",
+        "model-context-protocol",
+        "ai-tools",
+        "claude",
+        "copilot",
+        "basic-auth"
+    ],
+    "author": "lvmk",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git@github.com:stommazh/jira-mcp.git"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    },
+    "files": [
+        "dist",
+        "README.md",
+        "LICENSE"
+    ],
+    "dependencies": {
+        "@modelcontextprotocol/sdk": "^1.0.0",
+        "zod": "^3.23.0"
+    },
+    "devDependencies": {
+        "@types/node": "^20.0.0",
+        "typescript": "^5.4.0"
+    }
+}

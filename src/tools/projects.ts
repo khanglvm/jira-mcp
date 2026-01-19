@@ -1,0 +1,106 @@
+/**
+ * @file tools/projects.ts
+ * @description Project-related MCP tools for Jira.
+ */
+
+import { z } from 'zod';
+import { JiraClient } from '../client.js';
+
+/**
+ * Schema for get_project tool input.
+ */
+export const getProjectSchema = z.object({
+    projectKey: z.string().describe('The project key (e.g., "PROJ") or ID'),
+});
+
+/**
+ * Creates project tool handlers.
+ * @param client - Jira client instance
+ * @returns Object containing project tool handlers
+ */
+export function createProjectTools(client: JiraClient) {
+    return {
+        /**
+         * Lists all accessible projects.
+         */
+        jira_list_projects: async () => {
+            const projects = await client.getProjects();
+            return {
+                content: [
+                    {
+                        type: 'text' as const,
+                        text: JSON.stringify(
+                            {
+                                total: projects.length,
+                                projects: projects.map((p) => ({
+                                    key: p.key,
+                                    name: p.name,
+                                    id: p.id,
+                                    projectType: p.projectTypeKey,
+                                    lead: p.lead?.displayName,
+                                })),
+                            },
+                            null,
+                            2
+                        ),
+                    },
+                ],
+            };
+        },
+
+        /**
+         * Gets a project by key or ID.
+         */
+        jira_get_project: async (args: z.infer<typeof getProjectSchema>) => {
+            const project = await client.getProject(args.projectKey);
+            return {
+                content: [
+                    {
+                        type: 'text' as const,
+                        text: JSON.stringify(
+                            {
+                                key: project.key,
+                                name: project.name,
+                                id: project.id,
+                                description: project.description,
+                                projectType: project.projectTypeKey,
+                                lead: project.lead?.displayName,
+                            },
+                            null,
+                            2
+                        ),
+                    },
+                ],
+            };
+        },
+    };
+}
+
+/**
+ * Tool definitions for project operations.
+ */
+export const projectToolDefinitions = [
+    {
+        name: 'jira_list_projects',
+        description: 'List all Jira projects accessible to the authenticated user',
+        inputSchema: {
+            type: 'object' as const,
+            properties: {},
+            required: [],
+        },
+    },
+    {
+        name: 'jira_get_project',
+        description: 'Get details of a specific Jira project',
+        inputSchema: {
+            type: 'object' as const,
+            properties: {
+                projectKey: {
+                    type: 'string',
+                    description: 'The project key (e.g., "PROJ") or ID',
+                },
+            },
+            required: ['projectKey'],
+        },
+    },
+];
