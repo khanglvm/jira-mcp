@@ -1,10 +1,16 @@
 # @lvmk/jira-mcp
 
-MCP (Model Context Protocol) server providing Jira tools with HTTP Basic Authentication support. Designed for Jira Server v7.x API compatibility.
+MCP (Model Context Protocol) server providing Jira tools with **HTTP Basic Authentication** support. Specifically designed for **legacy self-hosted Jira Server** instances (v7.x and older) that only support basic authentication.
+
+> **🔔 Using Jira Cloud or newer Jira Data Center?**
+> 
+> If you're using **Jira Cloud** or **Jira Data Center 8.14+** that supports Personal Access Tokens (PAT), OAuth, or API tokens, we recommend using [**mcp-atlassian**](https://github.com/sooperset/mcp-atlassian) instead. It provides broader authentication options and supports both Jira and Confluence.
+>
+> This package (`@lvmk/jira-mcp`) is specifically for legacy Jira Server deployments where basic auth (username/password) is the only available authentication method.
 
 ## Features
 
-- 🔐 **Basic Authentication** - Simple username/password auth for Jira Server
+- 🔐 **Basic Authentication** - Username/password auth for legacy Jira Server
 - 📋 **Issue Management** - Create, read, update, delete issues
 - 🔍 **JQL Search** - Powerful issue search with JQL
 - 📁 **Project Tools** - List and inspect projects

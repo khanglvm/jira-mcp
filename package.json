@@ -1,7 +1,7 @@
 {
     "name": "@lvmk/jira-mcp",
     "version": "1.0.0",
-    "description": "MCP server providing Jira tools with basic authentication support for Jira Server v7.x",
+    "description": "MCP server providing Jira tools with basic authentication support for legacy Jira Server (v7.x and older)",
     "type": "module",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
@@ -12,8 +12,12 @@
         "build": "tsc",
         "dev": "tsc --watch",
         "start": "node dist/index.js",
+        "test": "npm run build && node dist-test/test/client.test.js",
+        "test:tools": "npm run build && node dist-test/test/tools.test.js",
+        "test:build": "tsc -p tsconfig.test.json",
+        "test:all": "npm run test:build && node dist-test/test/client.test.js && node dist-test/test/tools.test.js",
         "prepublishOnly": "npm run build",
-        "clean": "rm -rf dist"
+        "clean": "rm -rf dist dist-test"
     },
     "keywords": [
         "mcp",
@@ -22,7 +26,9 @@
         "ai-tools",
         "claude",
         "copilot",
-        "basic-auth"
+        "basic-auth",
+        "jira-server",
+        "legacy"
     ],
     "author": "lvmk",
     "license": "MIT",
@@ -44,6 +50,7 @@
     },
     "devDependencies": {
         "@types/node": "^20.0.0",
+        "dotenv": "^16.4.0",
         "typescript": "^5.4.0"
     }
 }
