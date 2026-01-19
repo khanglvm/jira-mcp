@@ -1,134 +1,82 @@
 # @lvmk/jira-mcp
 
-MCP (Model Context Protocol) server providing Jira tools with **HTTP Basic Authentication** support. Specifically designed for **legacy self-hosted Jira Server** instances (v7.x and older) that only support basic authentication.
+MCP server for **legacy Jira Server** (v7.x) with Basic Authentication. Works with any MCP-compatible AI tool.
 
-> **🔔 Using Jira Cloud or newer Jira Data Center?**
-> 
-> If you're using **Jira Cloud** or **Jira Data Center 8.14+** that supports Personal Access Tokens (PAT), OAuth, or API tokens, we recommend using [**mcp-atlassian**](https://github.com/sooperset/mcp-atlassian) instead. It provides broader authentication options and supports both Jira and Confluence.
->
-> This package (`@lvmk/jira-mcp`) is specifically for legacy Jira Server deployments where basic auth (username/password) is the only available authentication method.
+> **🔔 Using Jira Cloud or Data Center 8.14+?** Use [mcp-atlassian](https://github.com/sooperset/mcp-atlassian) instead for OAuth/PAT support.
 
-## 📑 Table of Contents
+---
 
-- [Features](#features)
-- [Installation](#installation)
-- [⚡ Quick CLI Setup](#-quick-cli-setup)
-- [Environment Variables](#environment-variables)
-- [Available Tools](#available-tools)
-- [MCP Configuration Examples](#mcp-configuration-examples)
-- [Usage Examples](#usage-examples)
-- [Development Guide](#development-guide)
-- [Contributing](#contributing)
-- [License](#license)
+## 📦 Installation
 
-## Features
-
-- 🔐 **Basic Authentication** - Username/password auth for legacy Jira Server
-- 📋 **Issue Management** - Create, read, update, delete issues
-- 🔍 **JQL Search** - Powerful issue search with JQL
-- 📁 **Project Tools** - List and inspect projects
-- 🔄 **Workflow Transitions** - Move issues through workflow states
-- 👤 **User Information** - Get current and other user details
-
-## Installation
+### Quick Start
 
 ```bash
 npx @lvmk/jira-mcp
 ```
 
-Or install globally:
+### Configuration Formats
 
-```bash
-npm install -g @lvmk/jira-mcp
+<details>
+<summary><strong>JSON (camelCase)</strong> - Claude Code, Antigravity, Cursor</summary>
+
+```json
+{
+  "mcpServers": {
+    "jira": {
+      "command": "npx",
+      "args": ["-y", "@lvmk/jira-mcp"],
+      "env": {
+        "JIRA_BASE_URL": "http://jira.example.com:8080",
+        "JIRA_USERNAME": "your-username",
+        "JIRA_PASSWORD": "your-password"
+      }
+    }
+  }
+}
 ```
+</details>
+
+<details>
+<summary><strong>JSON (dash-case)</strong> - VS Code, GitHub Copilot</summary>
+
+```json
+{
+  "servers": {
+    "jira": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@lvmk/jira-mcp"],
+      "env": {
+        "JIRA_BASE_URL": "http://jira.example.com:8080",
+        "JIRA_USERNAME": "your-username",
+        "JIRA_PASSWORD": "your-password"
+      }
+    }
+  }
+}
+```
+</details>
+
+<details>
+<summary><strong>YAML (Codex)</strong></summary>
+
+```yaml
+mcp_servers:
+  jira:
+    command: npx
+    args:
+      - -y
+      - "@lvmk/jira-mcp"
+    env:
+      JIRA_BASE_URL: http://jira.example.com:8080
+      JIRA_USERNAME: your-username
+      JIRA_PASSWORD: your-password
+```
+</details>
 
 ---
 
-## ⚡ Quick CLI Setup
-
-Automatically inject MCP configuration into your AI tool's config file with a single command:
-
-```bash
-npx @lvmk/jira-mcp setup -c <cli> -b <url> -u <user> -p <pass> [-s <scope>]
-```
-
-### Arguments
-
-| Short | Long | Description |
-|-------|------|-------------|
-| `-c` | `--cli` | Target CLI tool (**required**) |
-| `-b` | `--base-url` | Jira base URL (**required**) |
-| `-u` | `--username` | Jira username (**required**) |
-| `-p` | `--password` | Jira password (**required**) |
-| `-s` | `--scope` | `user` or `project` (default: `user`) |
-
-### Supported CLI Tools
-
-| CLI Tool | Command | Config Locations |
-|----------|---------|------------------|
-| **Claude Code** | `claude-code` | `~/.claude.json` (user) / `.mcp.json` (project) |
-| **Claude Desktop** | `claude-desktop` | `~/Library/Application Support/Claude/...` |
-| **GitHub Copilot** | `github-copilot` | `~/.mcp.json` (user) / `.vscode/mcp.json` (project) |
-| **Cursor** | `cursor` | `~/.cursor/mcp.json` (user) / `.cursor/mcp.json` (project) |
-| **Windsurf** | `windsurf` | `~/.codeium/windsurf/mcp_config.json` |
-| **Roo Code** | `roo-code` | `~/.roo/mcp.json` (user) / `.roo/mcp.json` (project) |
-| **Zed** | `zed` | `~/.config/zed/settings.json` |
-| **Factory Droid** | `factory-droid` | `~/.factory/mcp.json` (user) / `.factory/mcp.json` (project) |
-| **Google Antigravity** | `antigravity` | `~/.gemini/antigravity/mcp_config.json` (user only) |
-| **Gemini CLI** | `gemini-cli` | `~/.gemini/settings.json` (user) / `.gemini/settings.json` (project) |
-
-### Setup Examples
-
-```bash
-# Claude Code (user scope - available in all projects)
-npx @lvmk/jira-mcp setup -c claude-code -b https://jira.example.com -u admin -p secret
-
-# Cursor (project scope - only in current project)
-npx @lvmk/jira-mcp setup -c cursor -b https://jira.example.com -u admin -p secret -s project
-
-# GitHub Copilot (VS Code project config)
-npx @lvmk/jira-mcp setup -c github-copilot -b https://jira.example.com -u admin -p secret -s project
-
-# Claude Desktop
-npx @lvmk/jira-mcp setup -c claude-desktop -b https://jira.example.com -u admin -p secret
-
-# Gemini CLI
-npx @lvmk/jira-mcp setup -c gemini-cli -b https://jira.example.com -u admin -p secret
-
-# Factory Droid
-npx @lvmk/jira-mcp setup -c factory-droid -b https://jira.example.com -u admin -p secret
-
-# Windsurf
-npx @lvmk/jira-mcp setup -c windsurf -b https://jira.example.com -u admin -p secret
-```
-
-### Other Commands
-
-```bash
-# Show help
-npx @lvmk/jira-mcp --help
-
-# List supported CLI tools
-npx @lvmk/jira-mcp list-clis
-
-# Show version
-npx @lvmk/jira-mcp --version
-```
-
----
-
-## Environment Variables
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `JIRA_BASE_URL` | ✅ | Base URL of Jira instance (e.g., `http://jira.example.com:8080`) |
-| `JIRA_USERNAME` | ✅ | Username for authentication |
-| `JIRA_PASSWORD` | ✅ | Password for authentication |
-| `JIRA_API_VERSION` | ❌ | API version (default: `2`) |
-
-## Available Tools
-
-### Issue Tools
+## 🔧 Available Tools
 
 | Tool | Description |
 |------|-------------|
@@ -138,41 +86,79 @@ npx @lvmk/jira-mcp --version
 | `jira_delete_issue` | Delete an issue |
 | `jira_add_comment` | Add comment to issue |
 | `jira_get_comments` | Get issue comments |
-
-### Search Tools
-
-| Tool | Description |
-|------|-------------|
 | `jira_search` | Search issues using JQL |
-
-### Project Tools
-
-| Tool | Description |
-|------|-------------|
 | `jira_list_projects` | List all accessible projects |
 | `jira_get_project` | Get project details |
-
-### Transition Tools
-
-| Tool | Description |
-|------|-------------|
-| `jira_get_transitions` | Get available transitions for issue |
+| `jira_get_transitions` | Get available transitions |
 | `jira_transition_issue` | Transition issue to new status |
-
-### User Tools
-
-| Tool | Description |
-|------|-------------|
 | `jira_get_current_user` | Get authenticated user info |
 | `jira_get_user` | Get user by username |
 
 ---
 
-## MCP Configuration Examples
+## ⚙️ Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `JIRA_BASE_URL` | ✅ | Jira instance URL |
+| `JIRA_USERNAME` | ✅ | Username |
+| `JIRA_PASSWORD` | ✅ | Password |
+| `JIRA_API_VERSION` | ❌ | API version (default: `2`) |
+
+---
+
+<details>
+<summary><h2>⚡ Quick Setup CLI</h2></summary>
+
+Inject MCP configuration into your AI tool's config file:
+
+```bash
+npx @lvmk/jira-mcp setup -c <tool> -b <url> -u <user> -p <pass> [-s <scope>]
+```
+
+### Arguments
+
+| Arg | Description |
+|-----|-------------|
+| `-c` | Tool name (see below) |
+| `-b` | Jira base URL |
+| `-u` | Username |
+| `-p` | Password |
+| `-s` | `user` or `project` (default: `user`) |
+
+### Supported Tools
+
+| Tool | Config Path |
+|------|-------------|
+| `claude-code` | `~/.claude.json` / `.mcp.json` |
+| `claude-desktop` | `~/Library/Application Support/Claude/...` |
+| `github-copilot` | `~/.mcp.json` / `.vscode/mcp.json` |
+| `cursor` | `~/.cursor/mcp.json` |
+| `windsurf` | `~/.codeium/windsurf/mcp_config.json` |
+| `roo-code` | `~/.roo/mcp.json` |
+| `zed` | `~/.config/zed/settings.json` |
+| `factory-droid` | `~/.factory/mcp.json` |
+| `antigravity` | `~/.gemini/antigravity/mcp_config.json` |
+| `gemini-cli` | `~/.gemini/settings.json` |
+
+### Examples
+
+```bash
+npx @lvmk/jira-mcp setup -c claude-code -b https://jira.example.com -u admin -p secret
+npx @lvmk/jira-mcp setup -c cursor -b https://jira.example.com -u admin -p secret -s project
+npx @lvmk/jira-mcp list-clis  # List all tools
+```
+
+</details>
+
+---
+
+<details>
+<summary><h2>📖 Configuration Examples by Tool</h2></summary>
 
 ### Claude Code
 
-**Project-level** (`.mcp.json` in project root):
+**Project** (`.mcp.json`):
 ```json
 {
   "mcpServers": {
@@ -189,96 +175,9 @@ npx @lvmk/jira-mcp --version
 }
 ```
 
-**User-level** (`~/.claude.json`):
-```json
-{
-  "mcpServers": {
-    "jira": {
-      "command": "npx",
-      "args": ["-y", "@lvmk/jira-mcp"],
-      "env": {
-        "JIRA_BASE_URL": "http://jira.example.com:8080",
-        "JIRA_USERNAME": "your-username",
-        "JIRA_PASSWORD": "your-password"
-      }
-    }
-  }
-}
-```
+### GitHub Copilot (VS Code)
 
----
-
-### OpenCode
-
-**File:** `~/.opencode.json` or `./.opencode.json`
-
-```json
-{
-  "mcpServers": {
-    "jira": {
-      "type": "local",
-      "command": ["npx", "-y", "@lvmk/jira-mcp"],
-      "env": {
-        "JIRA_BASE_URL": "http://jira.example.com:8080",
-        "JIRA_USERNAME": "your-username",
-        "JIRA_PASSWORD": "your-password"
-      },
-      "enabled": true
-    }
-  }
-}
-```
-
----
-
-### Google Antigravity
-
-**File:** Custom MCP config (via MCP Store → "View raw config")
-
-```json
-{
-  "mcpServers": {
-    "jira": {
-      "command": "npx",
-      "args": ["-y", "@lvmk/jira-mcp"],
-      "env": {
-        "JIRA_BASE_URL": "http://jira.example.com:8080",
-        "JIRA_USERNAME": "your-username",
-        "JIRA_PASSWORD": "your-password"
-      }
-    }
-  }
-}
-```
-
----
-
-### Amp
-
-**File:** Can be added via agent command or `AGENTS.md` reference
-
-MCP configuration (same format as Claude):
-```json
-{
-  "mcpServers": {
-    "jira": {
-      "command": "npx",
-      "args": ["-y", "@lvmk/jira-mcp"],
-      "env": {
-        "JIRA_BASE_URL": "http://jira.example.com:8080",
-        "JIRA_USERNAME": "your-username",
-        "JIRA_PASSWORD": "your-password"
-      }
-    }
-  }
-}
-```
-
----
-
-### GitHub Copilot
-
-**Project-level** (`.vscode/mcp.json`):
+**Project** (`.vscode/mcp.json`):
 ```json
 {
   "servers": {
@@ -296,34 +195,9 @@ MCP configuration (same format as Claude):
 }
 ```
 
-**User-level** (VS Code `settings.json`):
-```json
-{
-  "github.copilot.chat.mcpServers": {
-    "jira": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@lvmk/jira-mcp"],
-      "env": {
-        "JIRA_BASE_URL": "http://jira.example.com:8080",
-        "JIRA_USERNAME": "your-username",
-        "JIRA_PASSWORD": "your-password"
-      }
-    }
-  }
-}
-```
-
----
-
 ### Claude Desktop
 
-**macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
-
-**Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
-
-**Linux:** `~/.config/Claude/claude_desktop_config.json`
-
+**macOS** `~/Library/Application Support/Claude/claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
@@ -340,9 +214,32 @@ MCP configuration (same format as Claude):
 }
 ```
 
+### OpenCode
+
+**File** `~/.opencode.json`:
+```json
+{
+  "mcpServers": {
+    "jira": {
+      "type": "local",
+      "command": ["npx", "-y", "@lvmk/jira-mcp"],
+      "env": {
+        "JIRA_BASE_URL": "http://jira.example.com:8080",
+        "JIRA_USERNAME": "your-username",
+        "JIRA_PASSWORD": "your-password"
+      },
+      "enabled": true
+    }
+  }
+}
+```
+
+</details>
+
 ---
 
-## Usage Examples
+<details>
+<summary><h2>💡 Usage Examples</h2></summary>
 
 ### Search for open bugs
 ```
@@ -355,234 +252,74 @@ Use jira_create_issue with:
 - projectKey: "PROJ"
 - summary: "Implement new feature"
 - issueType: "Task"
-- description: "Details about the feature..."
 ```
 
 ### Transition an issue
 ```
-1. Use jira_get_transitions with issueKey: "PROJ-123"
-2. Use jira_transition_issue with:
-   - issueKey: "PROJ-123"
-   - transitionId: "21" (from step 1)
-   - comment: "Moving to In Progress"
+1. jira_get_transitions with issueKey: "PROJ-123"
+2. jira_transition_issue with issueKey: "PROJ-123", transitionId: "21"
 ```
+
+</details>
 
 ---
 
-## Development Guide
-
-Want to fork and develop your own version? Here's everything you need to know.
+<details>
+<summary><h2>🛠️ Development Guide</h2></summary>
 
 ### Prerequisites
-
-- **Node.js** >= 18.0.0
-- **npm** >= 9.0.0
-- A Jira Server instance for testing
+- Node.js >= 18.0.0
+- npm >= 9.0.0
 
 ### Getting Started
 
 ```bash
-# Clone repository
 git clone git@github.com:stommazh/jira-mcp.git
 cd jira-mcp
-
-# Install dependencies
 npm install
-
-# Build TypeScript
 npm run build
 ```
 
-### Project Structure
+### Scripts
 
-```
-jira-mcp/
-├── src/
-│   ├── index.ts          # Main entry - CLI commands & MCP server
-│   ├── config.ts         # Environment config with Zod validation
-│   ├── client.ts         # Jira REST API client (Basic Auth)
-│   ├── setup.ts          # CLI setup for AI tool configuration
-│   └── tools/
-│       ├── index.ts      # Tool exports
-│       ├── issues.ts     # Issue CRUD & comments
-│       ├── search.ts     # JQL search
-│       ├── projects.ts   # Project listing
-│       ├── transitions.ts # Workflow transitions
-│       └── users.ts      # User info
-├── test/
-│   ├── client.test.ts    # Client integration tests
-│   └── tools.test.ts     # Tool handler tests
-├── dist/                 # Compiled output
-├── package.json
-├── tsconfig.json
-└── tsconfig.test.json
-```
+| Script | Description |
+|--------|-------------|
+| `npm run build` | Compile TypeScript |
+| `npm run dev` | Watch mode |
+| `npm run test:all` | Run all tests |
+| `npm run test:integration` | Integration tests |
+| `npm run clean` | Clean dist |
 
-### Environment Setup
+### Environment
 
-Create a `.env` file in the project root:
-
+Create `.env`:
 ```bash
-JIRA_BASE_URL=https://your-jira-instance.com
+JIRA_BASE_URL=https://your-jira.com
 JIRA_USERNAME=your-username
 JIRA_PASSWORD=your-password
 ```
 
-### Available Scripts
-
-| Script | Description |
-|--------|-------------|
-| `npm run build` | Compile TypeScript to `dist/` |
-| `npm run dev` | Watch mode compilation |
-| `npm run start` | Run compiled server |
-| `npm run test:all` | Build and run all tests |
-| `npm run test` | Run client tests only |
-| `npm run test:tools` | Run tool handler tests only |
-| `npm run test:integration` | Run MCP integration tests (Claude Code, OpenCode) |
-| `npm run clean` | Remove `dist/` and `dist-test/` |
-
-### Running Locally
-
-```bash
-# Method 1: With environment variables
-JIRA_BASE_URL=https://jira.example.com \
-JIRA_USERNAME=admin \
-JIRA_PASSWORD=secret \
-node dist/index.js
-
-# Method 2: With .env file (requires dotenv in your test)
-npm run test:all
-```
-
-### Testing CLI Commands
-
-```bash
-# Show help
-node dist/index.js --help
-
-# Setup command help
-node dist/index.js setup --help
-
-# List supported CLIs
-node dist/index.js list-clis
-
-# Test setup (creates config in current directory)
-node dist/index.js setup -c cursor -b https://jira.test.com -u test -p test -s project
-```
-
 ### Adding New Tools
 
-1. **Create tool file** in `src/tools/`:
+1. Create tool file in `src/tools/`
+2. Export from `src/tools/index.ts`
+3. Register in `src/index.ts`
 
-```typescript
-// src/tools/my-tool.ts
-import { z } from 'zod';
-import { JiraClient } from '../client.js';
+### Adding CLI Support
 
-export const myToolSchema = z.object({
-  param1: z.string().describe('Description'),
-});
+Edit `src/setup.ts` and add to `configs` object in `getConfigFileInfo()`.
 
-export function createMyTools(client: JiraClient) {
-  return {
-    jira_my_tool: async (args: z.infer<typeof myToolSchema>) => {
-      // Implementation
-      return {
-        content: [{ type: 'text' as const, text: JSON.stringify(result, null, 2) }],
-      };
-    },
-  };
-}
-
-export const myToolDefinitions = [
-  {
-    name: 'jira_my_tool',
-    description: 'Tool description',
-    inputSchema: {
-      type: 'object' as const,
-      properties: { param1: { type: 'string', description: 'Description' } },
-      required: ['param1'],
-    },
-  },
-];
-```
-
-2. **Export from `src/tools/index.ts`**:
-
-```typescript
-export * from './my-tool.js';
-```
-
-3. **Register in `src/index.ts`**:
-
-```typescript
-import { createMyTools, myToolDefinitions } from './tools/index.js';
-
-// In runMcpServer():
-const myTools = createMyTools(jiraClient);
-
-const allToolHandlers = {
-  ...issueTools,
-  ...myTools, // Add here
-};
-
-const allToolDefinitions = [
-  ...issueToolDefinitions,
-  ...myToolDefinitions, // Add here
-];
-```
-
-### Adding Support for New CLI Tools
-
-Edit `src/setup.ts` and add your CLI to the `configs` object in `getConfigFileInfo()`:
-
-```typescript
-'my-new-cli': {
-  user: { path: path.join(home, '.my-cli', 'config.json'), wrapperKey: 'mcpServers', serverKey: 'jira' },
-  project: { path: path.join(cwd, '.my-cli', 'config.json'), wrapperKey: 'mcpServers', serverKey: 'jira' },
-},
-```
-
-Then add it to the `SupportedCli` type and `validClis` array.
-
-### Publishing Your Fork
-
-```bash
-# Update package.json with your package name
-npm version patch  # or minor/major
-
-# Build and publish
-npm run build
-npm publish --access public
-```
-
-### MCP Protocol Notes
-
-- Uses **stdio transport** for npx execution
-- All tools return `{ content: [{ type: 'text', text: '...' }] }`
-- Errors return `{ content: [...], isError: true }`
-- Server logs go to `stderr` (not `stdout`) to avoid protocol interference
-
-### Claude Code Lazy Loading (2025+)
-
-Claude Code v2.1.7+ supports lazy tool loading via "Tool Search":
-- Tools are discovered dynamically instead of pre-loaded
-- Dramatically reduces context token usage (134k → ~5k tokens)
-- No changes needed on MCP server side - it's handled by Claude Code
+</details>
 
 ---
 
 ## Contributing
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
----
+2. Create feature branch
+3. Commit changes
+4. Open Pull Request
 
 ## License
 
 MIT
-
