@@ -5,3 +5,7 @@ dist-test/
 .DS_Store
 .env
 .env.local
+
+# Internal documentation (not for npm package)
+docs/
+plans/
