@@ -351,7 +351,17 @@ Use jira_create_issue with:
 
 ---
 
-## Development
+## Development Guide
+
+Want to fork and develop your own version? Here's everything you need to know.
+
+### Prerequisites
+
+- **Node.js** >= 18.0.0
+- **npm** >= 9.0.0
+- A Jira Server instance for testing
+
+### Getting Started
 
 ```bash
 # Clone repository
@@ -361,16 +371,199 @@ cd jira-mcp
 # Install dependencies
 npm install
 
-# Build
+# Build TypeScript
 npm run build
-
-# Run locally
-JIRA_BASE_URL=http://localhost:8080 \
-JIRA_USERNAME=admin \
-JIRA_PASSWORD=admin \
-node dist/index.js
 ```
+
+### Project Structure
+
+```
+jira-mcp/
+├── src/
+│   ├── index.ts          # Main entry - CLI commands & MCP server
+│   ├── config.ts         # Environment config with Zod validation
+│   ├── client.ts         # Jira REST API client (Basic Auth)
+│   ├── setup.ts          # CLI setup for AI tool configuration
+│   └── tools/
+│       ├── index.ts      # Tool exports
+│       ├── issues.ts     # Issue CRUD & comments
+│       ├── search.ts     # JQL search
+│       ├── projects.ts   # Project listing
+│       ├── transitions.ts # Workflow transitions
+│       └── users.ts      # User info
+├── test/
+│   ├── client.test.ts    # Client integration tests
+│   └── tools.test.ts     # Tool handler tests
+├── dist/                 # Compiled output
+├── package.json
+├── tsconfig.json
+└── tsconfig.test.json
+```
+
+### Environment Setup
+
+Create a `.env` file in the project root:
+
+```bash
+JIRA_BASE_URL=https://your-jira-instance.com
+JIRA_USERNAME=your-username
+JIRA_PASSWORD=your-password
+```
+
+### Available Scripts
+
+| Script | Description |
+|--------|-------------|
+| `npm run build` | Compile TypeScript to `dist/` |
+| `npm run dev` | Watch mode compilation |
+| `npm run start` | Run compiled server |
+| `npm run test:all` | Build and run all tests |
+| `npm run test` | Run client tests only |
+| `npm run test:tools` | Run tool handler tests only |
+| `npm run clean` | Remove `dist/` and `dist-test/` |
+
+### Running Locally
+
+```bash
+# Method 1: With environment variables
+JIRA_BASE_URL=https://jira.example.com \
+JIRA_USERNAME=admin \
+JIRA_PASSWORD=secret \
+node dist/index.js
+
+# Method 2: With .env file (requires dotenv in your test)
+npm run test:all
+```
+
+### Testing CLI Commands
+
+```bash
+# Show help
+node dist/index.js --help
+
+# Setup command help
+node dist/index.js setup --help
+
+# List supported CLIs
+node dist/index.js list-clis
+
+# Test setup (creates config in current directory)
+node dist/index.js setup -c cursor -b https://jira.test.com -u test -p test -s project
+```
+
+### Adding New Tools
+
+1. **Create tool file** in `src/tools/`:
+
+```typescript
+// src/tools/my-tool.ts
+import { z } from 'zod';
+import { JiraClient } from '../client.js';
+
+export const myToolSchema = z.object({
+  param1: z.string().describe('Description'),
+});
+
+export function createMyTools(client: JiraClient) {
+  return {
+    jira_my_tool: async (args: z.infer<typeof myToolSchema>) => {
+      // Implementation
+      return {
+        content: [{ type: 'text' as const, text: JSON.stringify(result, null, 2) }],
+      };
+    },
+  };
+}
+
+export const myToolDefinitions = [
+  {
+    name: 'jira_my_tool',
+    description: 'Tool description',
+    inputSchema: {
+      type: 'object' as const,
+      properties: { param1: { type: 'string', description: 'Description' } },
+      required: ['param1'],
+    },
+  },
+];
+```
+
+2. **Export from `src/tools/index.ts`**:
+
+```typescript
+export * from './my-tool.js';
+```
+
+3. **Register in `src/index.ts`**:
+
+```typescript
+import { createMyTools, myToolDefinitions } from './tools/index.js';
+
+// In runMcpServer():
+const myTools = createMyTools(jiraClient);
+
+const allToolHandlers = {
+  ...issueTools,
+  ...myTools, // Add here
+};
+
+const allToolDefinitions = [
+  ...issueToolDefinitions,
+  ...myToolDefinitions, // Add here
+];
+```
+
+### Adding Support for New CLI Tools
+
+Edit `src/setup.ts` and add your CLI to the `configs` object in `getConfigFileInfo()`:
+
+```typescript
+'my-new-cli': {
+  user: { path: path.join(home, '.my-cli', 'config.json'), wrapperKey: 'mcpServers', serverKey: 'jira' },
+  project: { path: path.join(cwd, '.my-cli', 'config.json'), wrapperKey: 'mcpServers', serverKey: 'jira' },
+},
+```
+
+Then add it to the `SupportedCli` type and `validClis` array.
+
+### Publishing Your Fork
+
+```bash
+# Update package.json with your package name
+npm version patch  # or minor/major
+
+# Build and publish
+npm run build
+npm publish --access public
+```
+
+### MCP Protocol Notes
+
+- Uses **stdio transport** for npx execution
+- All tools return `{ content: [{ type: 'text', text: '...' }] }`
+- Errors return `{ content: [...], isError: true }`
+- Server logs go to `stderr` (not `stdout`) to avoid protocol interference
+
+### Claude Code Lazy Loading (2025+)
+
+Claude Code v2.1.7+ supports lazy tool loading via "Tool Search":
+- Tools are discovered dynamically instead of pre-loaded
+- Dramatically reduces context token usage (134k → ~5k tokens)
+- No changes needed on MCP server side - it's handled by Claude Code
+
+---
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+---
 
 ## License
 
 MIT
+
