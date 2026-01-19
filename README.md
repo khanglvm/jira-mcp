@@ -420,6 +420,7 @@ JIRA_PASSWORD=your-password
 | `npm run test:all` | Build and run all tests |
 | `npm run test` | Run client tests only |
 | `npm run test:tools` | Run tool handler tests only |
+| `npm run test:integration` | Run MCP integration tests (Claude Code, OpenCode) |
 | `npm run clean` | Remove `dist/` and `dist-test/` |
 
 ### Running Locally
