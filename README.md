@@ -8,6 +8,19 @@ MCP (Model Context Protocol) server providing Jira tools with **HTTP Basic Authe
 >
 > This package (`@lvmk/jira-mcp`) is specifically for legacy Jira Server deployments where basic auth (username/password) is the only available authentication method.
 
+## 📑 Table of Contents
+
+- [Features](#features)
+- [Installation](#installation)
+- [⚡ Quick CLI Setup](#-quick-cli-setup)
+- [Environment Variables](#environment-variables)
+- [Available Tools](#available-tools)
+- [MCP Configuration Examples](#mcp-configuration-examples)
+- [Usage Examples](#usage-examples)
+- [Development Guide](#development-guide)
+- [Contributing](#contributing)
+- [License](#license)
+
 ## Features
 
 - 🔐 **Basic Authentication** - Username/password auth for legacy Jira Server
