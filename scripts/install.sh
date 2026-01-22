@@ -121,9 +121,10 @@ main() {
   # Run the TUI with proper TTY allocation
   # When running via pipe (curl | bash), stdin is the pipe, not the terminal
   # The TUI needs access to the actual terminal for keyboard input
-  if [[ "$IS_PIPED" == "true" ]] && [[ -t 0 ]] || [[ ! -t 0 ]]; then
-    # Redirect stdin from the actual terminal device
-    (cd "$tui_dir" && exec < /dev/tty && $runtime run src/installer.tsx)
+  # The redirect MUST be applied directly to the runtime command, not via exec in subshell
+  if [[ ! -t 0 ]]; then
+    # stdin is not a TTY (piped execution) - redirect from /dev/tty
+    (cd "$tui_dir" && $runtime run src/installer.tsx < /dev/tty)
   else
     (cd "$tui_dir" && $runtime run src/installer.tsx)
   fi
