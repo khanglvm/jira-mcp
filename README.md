@@ -11,8 +11,10 @@ MCP server for **legacy Jira Server** (v7.x) with Basic Authentication. Works wi
 Run this single command to interactively configure Jira MCP for your AI tool:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/khanglvm/jira-mcp/main/scripts/install.sh | bash
+bash <(curl -fsSL https://raw.githubusercontent.com/khanglvm/jira-mcp/main/scripts/install.sh)
 ```
+
+> **Note:** Uses process substitution (`<(...)`) instead of pipe to keep terminal interactive.
 
 Supports: **Claude Desktop** | **Claude Code** | **OpenCode**
 

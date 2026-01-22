@@ -2,7 +2,8 @@
 #
 # @khanglvm/jira-mcp Interactive Installer
 # 
-# Quick install: curl -fsSL https://raw.githubusercontent.com/khanglvm/jira-mcp/main/scripts/install.sh | bash
+# Quick install (process substitution for interactive TUI):
+#   bash <(curl -fsSL https://raw.githubusercontent.com/khanglvm/jira-mcp/main/scripts/install.sh)
 #
 # This wrapper downloads and runs the OpenTUI-based installer
 #
@@ -33,8 +34,8 @@ show_help() {
   cat <<EOF
 ${C_ACCENT}@khanglvm/jira-mcp Interactive Installer${C_RESET}
 
-${C_MUTED}Usage:${C_RESET}
-  curl -fsSL https://raw.githubusercontent.com/khanglvm/jira-mcp/main/scripts/install.sh | bash
+${C_MUTED}Usage (process substitution for interactive TUI):${C_RESET}
+  bash <(curl -fsSL https://raw.githubusercontent.com/khanglvm/jira-mcp/main/scripts/install.sh)
 
 ${C_MUTED}Or run locally:${C_RESET}
   ./scripts/install.sh
