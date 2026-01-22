@@ -1,0 +1,11 @@
+/**
+ * @file components/index.ts
+ * @description Component exports
+ */
+
+export { Header } from './Header.tsx';
+export { Footer } from './Footer.tsx';
+export { ToolMenu } from './ToolMenu.tsx';
+export { CredentialsPanel } from './CredentialsPanel.tsx';
+export { ConfirmPanel } from './ConfirmPanel.tsx';
+export { ResultPanel } from './ResultPanel.tsx';

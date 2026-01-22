@@ -6,6 +6,47 @@ MCP server for **legacy Jira Server** (v7.x) with Basic Authentication. Works wi
 
 ---
 
+## 🚀 Quick Install
+
+Run this single command to interactively configure Jira MCP for your AI tool:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/khanglvm/jira-mcp/main/scripts/install.sh | bash
+```
+
+Supports: **Claude Desktop** | **Claude Code** | **OpenCode**
+
+### Interactive TUI Features
+
+The installer provides a modern terminal UI with:
+
+| Feature | Description |
+|---------|-------------|
+| 🔍 **Auto-detect** | Automatically finds installed AI tools |
+| 🔄 **Safe merging** | Preserves existing MCP config |
+| 💾 **Auto-backup** | Creates backup before changes |
+| 📋 **Paste support** | Cmd+V (macOS) / Ctrl+V paste into fields |
+
+### Keyboard Shortcuts
+
+| Key | Action |
+|-----|--------|
+| `↑`/`↓` or `j`/`k` | Navigate |
+| `Tab` | Next field |
+| `Enter` | Select/Proceed |
+| `Ctrl+U` | Clear field |
+| `Cmd+V`/`Ctrl+V` | Paste |
+| `Esc` | Back/Cancel |
+| `q` | Quit |
+
+### Non-interactive Mode
+
+```bash
+./scripts/install.sh --tool claude-code --url https://jira.example.com --user admin --pass secret
+```
+
+---
+
 ## 📦 Installation
 
 ### Quick Start

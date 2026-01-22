@@ -9,3 +9,6 @@ dist-test/
 # Internal documentation (not for npm package)
 docs/
 plans/
+.idea
+*/**/CLAUDE.md
+.claude
