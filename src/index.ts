@@ -16,6 +16,10 @@ import {
 
 import { loadConfig } from './config.js';
 import { JiraClient, JiraApiError } from './client.js';
+// Export MCP registry types for external use
+export * from './types/mcp-config.js';
+export { createRegistry, createRegistryFromConfig, McpRegistry } from './mcp-registry.js';
+export { fetchMcpConfig, clearCache, getCacheStatus } from './config-fetcher.js';
 import {
     createIssueTools,
     issueToolDefinitions,
@@ -93,7 +97,7 @@ EXAMPLES:
  * Handles CLI commands and arguments.
  * @returns true if handled as CLI command, false to continue as MCP server
  */
-function handleCliCommands(): boolean {
+async function handleCliCommands(): Promise<boolean> {
     const args = process.argv.slice(2);
 
     if (args.length === 0) {
@@ -133,7 +137,7 @@ function handleCliCommands(): boolean {
                 process.exit(1);
             }
 
-            const result = injectMcpConfig(options);
+            const result = await injectMcpConfig(options);
             console.log(result.message);
 
             if (!result.success) {
@@ -259,13 +263,15 @@ async function runMcpServer(): Promise<void> {
 }
 
 // Main entry point
-if (handleCliCommands()) {
-    // CLI command handled, exit normally
-    process.exit(0);
-} else {
-    // Run as MCP server
-    runMcpServer().catch((error) => {
-        console.error('Fatal error:', error);
-        process.exit(1);
-    });
-}
+(async () => {
+    if (await handleCliCommands()) {
+        // CLI command handled, exit normally
+        process.exit(0);
+    } else {
+        // Run as MCP server
+        runMcpServer().catch((error) => {
+            console.error('Fatal error:', error);
+            process.exit(1);
+        });
+    }
+})();

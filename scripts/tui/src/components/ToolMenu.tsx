@@ -2,6 +2,9 @@
  * @file components/ToolMenu.tsx
  * @description Scrollable tool selection menu with keyboard navigation
  * Following OpenTUI pattern: scrollable list with selection highlight
+ *
+ * @deprecated Use MultiToolSelector for multi-tool selection.
+ * This component remains for backward compatibility only.
  */
 
 import { memo } from 'react';

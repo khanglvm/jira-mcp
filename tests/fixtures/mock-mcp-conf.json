@@ -1,0 +1,164 @@
+{
+  "$schema": "./schema/mcp-conf.schema.json",
+  "$id": "https://raw.githubusercontent.com/khanglvm/aic/main/mcp/mcp-conf.json",
+  "version": "1.0.0",
+  "lastUpdated": "2025-01-23T12:00:00Z",
+  "description": "Mock MCP configuration for testing",
+  "clients": {
+    "claude-code": {
+      "name": "claude-code",
+      "vendor": "Anthropic",
+      "description": "Claude Code CLI tool",
+      "docsUrl": "https://docs.anthropic.com",
+      "configLocations": {
+        "macos": {
+          "user": "~/.claude.json",
+          "project": ".mcp.json"
+        },
+        "windows": {
+          "user": "%USERPROFILE%\\.claude.json",
+          "project": ".mcp.json"
+        },
+        "linux": {
+          "user": "~/.claude.json",
+          "project": ".mcp.json"
+        }
+      },
+      "configFormat": {
+        "wrapperKey": "mcpServers",
+        "serverSchema": {
+          "command": { "type": "string", "required": true },
+          "args": { "type": "array", "required": true },
+          "env": { "type": "object", "required": true }
+        },
+        "format": "json"
+      },
+      "cli": {
+        "commands": "claude"
+      },
+      "scopes": ["user", "project"],
+      "transportSupport": ["stdio"]
+    },
+    "claude-desktop": {
+      "name": "claude-desktop",
+      "vendor": "Anthropic",
+      "description": "Claude Desktop App",
+      "docsUrl": "https://docs.anthropic.com",
+      "configLocations": {
+        "macos": {
+          "user": "~/Library/Application Support/Claude/claude_desktop_config.json"
+        },
+        "windows": {
+          "user": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        },
+        "linux": {
+          "user": "~/.config/Claude/claude_desktop_config.json"
+        }
+      },
+      "configFormat": {
+        "wrapperKey": "mcpServers",
+        "serverSchema": {
+          "command": { "type": "string", "required": true },
+          "args": { "type": "array", "required": true },
+          "env": { "type": "object", "required": true }
+        },
+        "format": "json"
+      },
+      "scopes": ["user"],
+      "transportSupport": ["stdio"]
+    },
+    "cursor": {
+      "name": "cursor",
+      "vendor": "Cursor",
+      "description": "Cursor AI Editor",
+      "docsUrl": "https://cursor.sh",
+      "configLocations": {
+        "macos": {
+          "user": "~/.cursor/mcp.json",
+          "project": ".cursor/mcp.json"
+        },
+        "windows": {
+          "user": "%USERPROFILE%\\.cursor\\mcp.json",
+          "project": ".cursor\\mcp.json"
+        },
+        "linux": {
+          "user": "~/.cursor/mcp.json",
+          "project": ".cursor/mcp.json"
+        }
+      },
+      "configFormat": {
+        "wrapperKey": "mcpServers",
+        "serverSchema": {
+          "command": { "type": "string", "required": true },
+          "args": { "type": "array", "required": true },
+          "env": { "type": "object", "required": true }
+        },
+        "format": "json"
+      },
+      "cli": {
+        "commands": "cursor"
+      },
+      "scopes": ["user", "project"],
+      "transportSupport": ["stdio"]
+    },
+    "github-copilot": {
+      "name": "github-copilot",
+      "vendor": "GitHub",
+      "description": "GitHub Copilot for VS Code",
+      "docsUrl": "https://docs.github.com/copilot",
+      "configLocations": {
+        "macos": {
+          "user": "~/.mcp.json",
+          "project": ".vscode/mcp.json"
+        },
+        "windows": {
+          "user": "%USERPROFILE%\\.mcp.json",
+          "project": ".vscode\\mcp.json"
+        },
+        "linux": {
+          "user": "~/.mcp.json",
+          "project": ".vscode/mcp.json"
+        }
+      },
+      "configFormat": {
+        "wrapperKey": "servers",
+        "serverSchema": {
+          "type": { "type": "string", "required": false },
+          "command": { "type": "string", "required": true },
+          "args": { "type": "array", "required": false }
+        },
+        "format": "json"
+      },
+      "scopes": ["user", "project"],
+      "transportSupport": ["stdio"]
+    },
+    "opencode": {
+      "name": "opencode",
+      "vendor": "OpenCode",
+      "description": "OpenCode Editor",
+      "docsUrl": "https://opencode.sh",
+      "configLocations": {
+        "macos": {
+          "user": "~/.config/opencode/mcp.json"
+        },
+        "windows": {
+          "user": "%APPDATA%\\opencode\\mcp.json"
+        },
+        "linux": {
+          "user": "~/.config/opencode/mcp.json"
+        }
+      },
+      "configFormat": {
+        "wrapperKey": "mcpServers",
+        "serverSchema": {
+          "type": { "type": "string", "required": false },
+          "command": { "type": "array", "required": true },
+          "environment": { "type": "object", "required": false }
+        },
+        "format": "json"
+      },
+      "scopes": ["user"],
+      "transportSupport": ["local"]
+    }
+  }
+}

@@ -1,14 +1,15 @@
 /**
  * @file setup.ts
  * @description CLI setup command for injecting MCP configuration into various AI tools.
- * Supports: Claude Code, Claude Desktop, GitHub Copilot, Cursor, Windsurf, Roo Code, Zed, Factory Droid
+ * Dynamically supports all MCP clients from the registry (14 tools).
  */
 
 import * as fs from 'fs';
 import * as path from 'path';
-import * as os from 'os';
+import { createRegistry, McpRegistry } from './mcp-registry.js';
+import { mapPlatform, resolvePlatformPath } from './utils/path-resolver.js';
 
-/** Supported CLI tools for MCP configuration */
+/** Supported CLI tools for MCP configuration - all 14 tools from registry */
 export type SupportedCli =
     | 'claude-code'
     | 'claude-desktop'
@@ -19,7 +20,11 @@ export type SupportedCli =
     | 'zed'
     | 'factory-droid'
     | 'antigravity'
-    | 'gemini-cli';
+    | 'gemini-cli'
+    | 'opencode'
+    | 'vscode-copilot'
+    | 'jetbrains-copilot'
+    | 'codex-cli';
 
 /** Configuration scope - user-level or project-level */
 export type ConfigScope = 'user' | 'project';
@@ -47,72 +52,70 @@ interface ConfigFileInfo {
     serverKey: string;  // The key name for this server, e.g., 'jira'
 }
 
+/** Registry cache for avoiding repeated fetches */
+let registryCache: McpRegistry | null = null;
+
 /**
- * Gets the config file path and format for each CLI tool.
+ * Initializes the MCP registry (cached).
+ * @returns Initialized MCP registry
+ */
+async function initializeRegistry(): Promise<McpRegistry> {
+    if (!registryCache) {
+        registryCache = await createRegistry();
+    }
+    return registryCache;
+}
+
+/**
+ * Expands environment variables and home directory in a path.
+ */
+function expandPath(filePath: string): string {
+    return path.resolve(resolvePlatformPath(filePath));
+}
+
+/**
+ * Gets the config file path and format for each CLI tool using the MCP registry.
  * @param cli - Target CLI tool
  * @param scope - User or project scope
  * @returns Config file info or null if unsupported
  */
-function getConfigFileInfo(cli: SupportedCli, scope: ConfigScope): ConfigFileInfo | null {
-    const home = os.homedir();
-    const cwd = process.cwd();
+async function getConfigFileInfo(cli: SupportedCli, scope: ConfigScope): Promise<ConfigFileInfo | null> {
+    const registry = await initializeRegistry();
+    const client = registry.getClient(cli);
 
-    const configs: Record<SupportedCli, { user: ConfigFileInfo; project: ConfigFileInfo }> = {
-        'claude-code': {
-            user: { path: path.join(home, '.claude.json'), wrapperKey: 'mcpServers', serverKey: 'jira' },
-            project: { path: path.join(cwd, '.mcp.json'), wrapperKey: 'mcpServers', serverKey: 'jira' },
-        },
-        'claude-desktop': {
-            user: {
-                path: process.platform === 'darwin'
-                    ? path.join(home, 'Library', 'Application Support', 'Claude', 'claude_desktop_config.json')
-                    : process.platform === 'win32'
-                        ? path.join(process.env.APPDATA || '', 'Claude', 'claude_desktop_config.json')
-                        : path.join(home, '.config', 'Claude', 'claude_desktop_config.json'),
-                wrapperKey: 'mcpServers',
-                serverKey: 'jira',
-            },
-            project: { path: '', wrapperKey: '', serverKey: '' }, // Claude Desktop doesn't support project scope
-        },
-        'github-copilot': {
-            user: { path: path.join(home, '.mcp.json'), wrapperKey: 'servers', serverKey: 'jira' },
-            project: { path: path.join(cwd, '.vscode', 'mcp.json'), wrapperKey: 'servers', serverKey: 'jira' },
-        },
-        'cursor': {
-            user: { path: path.join(home, '.cursor', 'mcp.json'), wrapperKey: 'mcpServers', serverKey: 'jira' },
-            project: { path: path.join(cwd, '.cursor', 'mcp.json'), wrapperKey: 'mcpServers', serverKey: 'jira' },
-        },
-        'windsurf': {
-            user: { path: path.join(home, '.codeium', 'windsurf', 'mcp_config.json'), wrapperKey: 'mcpServers', serverKey: 'jira' },
-            project: { path: path.join(cwd, '.windsurf', 'mcp_config.json'), wrapperKey: 'mcpServers', serverKey: 'jira' },
-        },
-        'roo-code': {
-            user: { path: path.join(home, '.roo', 'mcp.json'), wrapperKey: 'mcpServers', serverKey: 'jira' },
-            project: { path: path.join(cwd, '.roo', 'mcp.json'), wrapperKey: 'mcpServers', serverKey: 'jira' },
-        },
-        'zed': {
-            user: { path: path.join(home, '.config', 'zed', 'settings.json'), wrapperKey: 'context_servers', serverKey: 'jira' },
-            project: { path: path.join(cwd, '.zed', 'settings.json'), wrapperKey: 'context_servers', serverKey: 'jira' },
-        },
-        'factory-droid': {
-            user: { path: path.join(home, '.factory', 'mcp.json'), wrapperKey: 'mcpServers', serverKey: 'jira' },
-            project: { path: path.join(cwd, '.factory', 'mcp.json'), wrapperKey: 'mcpServers', serverKey: 'jira' },
-        },
-        'antigravity': {
-            user: { path: path.join(home, '.gemini', 'antigravity', 'mcp_config.json'), wrapperKey: 'mcpServers', serverKey: 'jira' },
-            project: { path: '', wrapperKey: '', serverKey: '' }, // Antigravity only supports user-level config
-        },
-        'gemini-cli': {
-            user: { path: path.join(home, '.gemini', 'settings.json'), wrapperKey: 'mcpServers', serverKey: 'jira' },
-            project: { path: path.join(cwd, '.gemini', 'settings.json'), wrapperKey: 'mcpServers', serverKey: 'jira' },
-        },
-    };
-
-    const configInfo = configs[cli]?.[scope];
-    if (!configInfo || !configInfo.path) {
+    if (!client) {
         return null;
     }
-    return configInfo;
+
+    // Check if client supports the requested scope
+    if (!registry.supportsScope(cli, scope)) {
+        return null;
+    }
+
+    // Map Node.js platform to registry platform key
+    const platformKey = mapPlatform(process.platform);
+    const platformLocations = client.configLocations[platformKey];
+
+    if (!platformLocations) {
+        return null;
+    }
+
+    // Get path for the requested scope
+    // PlatformPaths has: global?, user?, project?, workspace?, local?, managed?, globalAlt?
+    const scopePath = platformLocations[scope as keyof typeof platformLocations];
+
+    if (!scopePath || typeof scopePath !== 'string') {
+        return null;
+    }
+
+    // Expand environment variables and home directory
+    const expandedPath = expandPath(scopePath);
+
+    return {
+        path: expandedPath,
+        wrapperKey: client.configFormat.wrapperKey,
+        serverKey: 'jira',
+    };
 }
 
 /**
@@ -165,8 +168,8 @@ function ensureDirectoryExists(filePath: string): void {
  * @param options - Setup options
  * @returns Result message
  */
-export function injectMcpConfig(options: SetupOptions): { success: boolean; message: string } {
-    const configInfo = getConfigFileInfo(options.cli, options.scope);
+export async function injectMcpConfig(options: SetupOptions): Promise<{ success: boolean; message: string }> {
+    const configInfo = await getConfigFileInfo(options.cli, options.scope);
 
     if (!configInfo) {
         return {
@@ -257,7 +260,8 @@ export function parseSetupArgs(args: string[]): SetupOptions | null {
     // Validate required fields
     const validClis: SupportedCli[] = [
         'claude-code', 'claude-desktop', 'github-copilot', 'cursor',
-        'windsurf', 'roo-code', 'zed', 'factory-droid', 'antigravity', 'gemini-cli'
+        'windsurf', 'roo-code', 'zed', 'factory-droid', 'antigravity', 'gemini-cli',
+        'opencode', 'vscode-copilot', 'jetbrains-copilot', 'codex-cli'
     ];
 
     if (!options.cli || !validClis.includes(options.cli)) {
@@ -286,43 +290,24 @@ Usage:
 Arguments:
   -c, --cli        Target CLI tool (required)
                    Options: claude-code, claude-desktop, github-copilot, cursor,
-                            windsurf, roo-code, zed, factory-droid, antigravity, gemini-cli
+                            windsurf, roo-code, zed, factory-droid, antigravity,
+                            gemini-cli, opencode, vscode-copilot, jetbrains-copilot,
+                            codex-cli
 
   -b, --base-url   Jira base URL (required)
-                   Example: https://jira.example.com
-
   -u, --username   Jira username (required)
-
   -p, --password   Jira password (required)
-
   -s, --scope      Configuration scope (optional, default: user)
                    Options: user, project
 
 Examples:
-  # Add to Claude Code user config
   npx @khanglvm/jira-mcp setup -c claude-code -b https://jira.example.com -u admin -p secret
-
-  # Add to Cursor project config
   npx @khanglvm/jira-mcp setup -c cursor -b https://jira.example.com -u admin -p secret -s project
 
-  # Add to GitHub Copilot (VS Code)
-  npx @khanglvm/jira-mcp setup -c github-copilot -b https://jira.example.com -u admin -p secret -s project
-
 Supported CLI Tools:
-  ┌─────────────────┬───────────────────────────────────────────────────────┐
-  │ CLI             │ Config File Location                                  │
-  ├─────────────────┼───────────────────────────────────────────────────────┤
-  │ claude-code     │ ~/.claude.json (user) | .mcp.json (project)           │
-  │ claude-desktop  │ ~/Library/Application Support/Claude/... (user only)  │
-  │ github-copilot  │ ~/.mcp.json (user) | .vscode/mcp.json (project)       │
-  │ cursor          │ ~/.cursor/mcp.json (user) | .cursor/mcp.json (proj)   │
-  │ windsurf        │ ~/.codeium/windsurf/mcp_config.json (user)            │
-  │ roo-code        │ ~/.roo/mcp.json (user) | .roo/mcp.json (project)      │
-  │ zed             │ ~/.config/zed/settings.json (user)                    │
-  │ factory-droid   │ ~/.factory/mcp.json (user) | .factory/mcp.json (proj) │
-  │ antigravity     │ ~/.gemini/antigravity/mcp_config.json (user only)     │
-  │ gemini-cli      │ ~/.gemini/settings.json (user) | .gemini/settings     │
-  └─────────────────┴───────────────────────────────────────────────────────┘
+  claude-code, claude-desktop, github-copilot, cursor, windsurf, roo-code, zed,
+  factory-droid, antigravity, gemini-cli, opencode, vscode-copilot, jetbrains-copilot,
+  codex-cli
 `);
 }
 
@@ -331,16 +316,20 @@ Supported CLI Tools:
  */
 export function printSupportedClis(): void {
     console.log(`
-Supported CLI tools:
-  • claude-code     - Claude Code (Anthropic)
-  • claude-desktop  - Claude Desktop App
-  • github-copilot  - GitHub Copilot (VS Code)
-  • cursor          - Cursor AI Editor
-  • windsurf        - Windsurf (Codeium)
-  • roo-code        - Roo Code
-  • zed             - Zed Editor
-  • factory-droid   - Factory Droid AI
-  • antigravity     - Google Antigravity IDE
-  • gemini-cli      - Gemini CLI (Google)
+Supported CLI tools (14):
+  • claude-code         - Claude Code (Anthropic)
+  • claude-desktop      - Claude Desktop App
+  • github-copilot      - GitHub Copilot (VS Code)
+  • cursor              - Cursor AI Editor
+  • windsurf            - Windsurf (Codeium)
+  • roo-code            - Roo Code
+  • zed                 - Zed Editor
+  • factory-droid       - Factory Droid AI
+  • antigravity         - Google Antigravity IDE
+  • gemini-cli          - Gemini CLI (Google)
+  • opencode            - OpenCode Editor
+  • vscode-copilot      - VS Code Copilot Extension
+  • jetbrains-copilot   - JetBrains IDEs
+  • codex-cli           - Codex CLI
 `);
 }

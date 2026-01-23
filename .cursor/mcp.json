@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "jira": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@khanglvm/jira-mcp"
+      ],
+      "env": {
+        "JIRA_BASE_URL": "https://jira.example.com",
+        "JIRA_USERNAME": "testuser",
+        "JIRA_PASSWORD": "testpass"
+      }
+    }
+  }
+}

@@ -6,6 +6,22 @@ MCP server for **legacy Jira Server** (v7.x) with Basic Authentication. Works wi
 
 ---
 
+## ✨ New Features
+
+### Dynamic MCP Configuration (v1.1+)
+
+- **14 AI Tools Supported**: TUI installer now supports all major MCP-compatible tools (was 3)
+- **Multi-Tool Selection**: Batch install to multiple tools at once with checkbox UI
+- **Scope Validation**: Automatic fallback between user/project scopes with validation
+- **Remote Config Registry**: Dynamic client configs fetched from `https://raw.githubusercontent.com/khanglvm/aic/main/mcp/mcp-conf.json`
+- **Smart Caching**: 1-min TTL with memory + file cache for offline resilience
+- **YAML + JSON Support**: Handles multiple config formats with optional dependencies
+- **89 Integration Tests**: Comprehensive test coverage for reliability
+
+**Supported Tools**: Claude Desktop, Claude Code, GitHub Copilot, Cursor, Windsurf, Roo Code, Zed, Factory Droid, Antigravity, Gemini CLI, OpenCode, VS Code Copilot, JetBrains Copilot, Codex CLI
+
+---
+
 ## 🚀 Quick Install
 
 Run this single command to interactively configure Jira MCP for your AI tool:
@@ -16,9 +32,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/khanglvm/jira-mcp/main/scrip
 
 > **Note:** Uses process substitution (`<(...)`) instead of pipe to keep terminal interactive.
 
-Supports: **Claude Desktop** | **Claude Code** | **OpenCode**
-
-The installer auto-detects AI tools, safely merges config, and creates backups.
+The TUI installer auto-detects installed tools, supports multi-select batch installation, safely merges config, and creates backups.
 
 **CLI Mode:**
 ```bash
@@ -232,6 +246,7 @@ Use jira_create_issue with:
 ### Prerequisites
 - Node.js >= 18.0.0
 - npm >= 9.0.0
+- Bun (recommended for TUI development)
 
 ### Getting Started
 
@@ -248,7 +263,8 @@ npm run build
 |--------|-------------|
 | `npm run build` | Compile TypeScript |
 | `npm run dev` | Watch mode |
-| `npm run test:all` | Run all tests |
+| `npm run test:all` | Run all tests (89+ integration tests) |
+| `npm run test:tools` | Tool-specific tests |
 | `npm run test:integration` | Integration tests |
 | `npm run clean` | Clean dist |
 
@@ -261,6 +277,40 @@ JIRA_USERNAME=your-username
 JIRA_PASSWORD=your-password
 ```
 
+### Project Structure
+
+```
+jira-mcp/
+├── src/
+│   ├── tools/              # MCP tool implementations (issues, projects, search, etc.)
+│   ├── types/              # TypeScript type definitions
+│   ├── utils/              # Utility functions (path resolution, etc.)
+│   ├── mcp-registry.ts     # MCP client registry for dynamic config
+│   ├── config-fetcher.ts   # Remote config fetcher with caching
+│   ├── setup.ts            # CLI setup command
+│   ├── client.ts           # Jira API client
+│   ├── config.ts           # Configuration management
+│   └── index.ts            # MCP server entry point
+├── scripts/
+│   ├── install.sh          # Interactive installer wrapper
+│   └── tui/                # OpenTUI-based installer UI
+│       ├── src/
+│       │   ├── components/ # TUI React components
+│       │   ├── hooks/      # Custom React hooks
+│       │   ├── batch-installer.ts  # Batch installation logic
+│       │   ├── detection.ts        # Tool detection
+│       │   └── validation.ts        # Scope validation
+└── test/                   # Integration tests
+```
+
+### Architecture
+
+**Dynamic MCP Configuration System**:
+- **Config Fetcher** (`src/config-fetcher.ts`): Fetches remote MCP configs with hybrid caching (memory + file)
+- **MCP Registry** (`src/mcp-registry.ts`): Query interface for client configs by scope/platform
+- **Batch Installer** (`scripts/tui/src/batch-installer.ts`): Parallel installation with scope validation
+- **Validation** (`scripts/tui/src/validation.ts`): Scope validation with automatic fallback
+
 ### Adding New Tools
 
 1. Create tool file in `src/tools/`
@@ -269,7 +319,10 @@ JIRA_PASSWORD=your-password
 
 ### Adding CLI Support
 
-Edit `src/setup.ts` and add to `configs` object in `getConfigFileInfo()`.
+New tools are automatically supported via the remote MCP registry. To add a new AI tool:
+
+1. Add client config to `https://github.com/khanglvm/aic/blob/main/mcp/mcp-conf.json`
+2. TUI will automatically detect and configure the new tool
 
 </details>
 
