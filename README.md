@@ -18,34 +18,14 @@ bash <(curl -fsSL https://raw.githubusercontent.com/khanglvm/jira-mcp/main/scrip
 
 Supports: **Claude Desktop** | **Claude Code** | **OpenCode**
 
-### Interactive TUI Features
+The installer auto-detects AI tools, safely merges config, and creates backups.
 
-The installer provides a modern terminal UI with:
-
-| Feature | Description |
-|---------|-------------|
-| 🔍 **Auto-detect** | Automatically finds installed AI tools |
-| 🔄 **Safe merging** | Preserves existing MCP config |
-| 💾 **Auto-backup** | Creates backup before changes |
-| 📋 **Paste support** | Cmd+V (macOS) / Ctrl+V paste into fields |
-
-### Keyboard Shortcuts
-
-| Key | Action |
-|-----|--------|
-| `↑`/`↓` or `j`/`k` | Navigate |
-| `Tab` | Next field |
-| `Enter` | Select/Proceed |
-| `Ctrl+U` | Clear field |
-| `Cmd+V`/`Ctrl+V` | Paste |
-| `Esc` | Back/Cancel |
-| `q` | Quit |
-
-### Non-interactive Mode
-
+**CLI Mode:**
 ```bash
-./scripts/install.sh --tool claude-code --url https://jira.example.com --user admin --pass secret
+./scripts/install.sh --url https://jira.example.com
 ```
+
+Run `./scripts/install.sh --help` for all options.
 
 ---
 
@@ -151,57 +131,12 @@ mcp_servers:
 ---
 
 <details>
-<summary><h2>⚡ Quick Setup CLI</h2></summary>
+<summary><h2>📖 Configuration Examples</h2></summary>
 
-Inject MCP configuration into your AI tool's config file:
+### Claude Desktop (macOS)
 
-```bash
-npx @khanglvm/jira-mcp setup -c <tool> -b <url> -u <user> -p <pass> [-s <scope>]
-```
+**File:** `~/Library/Application Support/Claude/claude_desktop_config.json`
 
-### Arguments
-
-| Arg | Description |
-|-----|-------------|
-| `-c` | Tool name (see below) |
-| `-b` | Jira base URL |
-| `-u` | Username |
-| `-p` | Password |
-| `-s` | `user` or `project` (default: `user`) |
-
-### Supported Tools
-
-| Tool | Config Path |
-|------|-------------|
-| `claude-code` | `~/.claude.json` / `.mcp.json` |
-| `claude-desktop` | `~/Library/Application Support/Claude/...` |
-| `github-copilot` | `~/.mcp.json` / `.vscode/mcp.json` |
-| `cursor` | `~/.cursor/mcp.json` |
-| `windsurf` | `~/.codeium/windsurf/mcp_config.json` |
-| `roo-code` | `~/.roo/mcp.json` |
-| `zed` | `~/.config/zed/settings.json` |
-| `factory-droid` | `~/.factory/mcp.json` |
-| `antigravity` | `~/.gemini/antigravity/mcp_config.json` |
-| `gemini-cli` | `~/.gemini/settings.json` |
-
-### Examples
-
-```bash
-npx @khanglvm/jira-mcp setup -c claude-code -b https://jira.example.com -u admin -p secret
-npx @khanglvm/jira-mcp setup -c cursor -b https://jira.example.com -u admin -p secret -s project
-npx @khanglvm/jira-mcp list-clis  # List all tools
-```
-
-</details>
-
----
-
-<details>
-<summary><h2>📖 Configuration Examples by Tool</h2></summary>
-
-### Claude Code
-
-**Project** (`.mcp.json`):
 ```json
 {
   "mcpServers": {
@@ -218,29 +153,10 @@ npx @khanglvm/jira-mcp list-clis  # List all tools
 }
 ```
 
-### GitHub Copilot (VS Code)
+### Claude Code
 
-**Project** (`.vscode/mcp.json`):
-```json
-{
-  "servers": {
-    "jira": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@khanglvm/jira-mcp"],
-      "env": {
-        "JIRA_BASE_URL": "http://jira.example.com:8080",
-        "JIRA_USERNAME": "your-username",
-        "JIRA_PASSWORD": "your-password"
-      }
-    }
-  }
-}
-```
+**File:** `.mcp.json` (project) or `~/.claude.json` (user)
 
-### Claude Desktop
-
-**macOS** `~/Library/Application Support/Claude/claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
@@ -259,7 +175,8 @@ npx @khanglvm/jira-mcp list-clis  # List all tools
 
 ### OpenCode
 
-**File** `~/.opencode.json`:
+**File:** `~/.opencode.json`
+
 ```json
 {
   "mcpServers": {
@@ -276,6 +193,8 @@ npx @khanglvm/jira-mcp list-clis  # List all tools
   }
 }
 ```
+
+> **Other tools:** See [Configuration Formats](#-installation) section above for JSON/YAML variants.
 
 </details>
 
