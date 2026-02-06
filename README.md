@@ -40,13 +40,18 @@ npx @khanglvm/mcpm https://github.com/khanglvm/jira-mcp
 
 ## 🤖 For AI Agents
 
+> **⚠️ IMPORTANT:** AI agents MUST NOT use the Quick Install command above. Instead, follow the automated installation workflow below to ensure proper configuration and agent compatibility.
+
 ### MCP Installation Workflow
 
-Follow the [MCP Server Installation Workflow](https://raw.githubusercontent.com/khanglvm/agent-tools/refs/heads/main/.agent/workflows/install-mcp-server.md) to install this MCP server.
+**REQUIRED:** Read and follow the [MCP Server Installation Workflow](https://raw.githubusercontent.com/khanglvm/agent-tools/refs/heads/main/.agent/workflows/install-mcp-server.md) to install this MCP server. This workflow handles:
+- Automatic agent detection and configuration
+- Secure credential collection
+- Proper config format transformation for your specific agent
 
 ### Agent Skill
 
-This repository includes an agent skill at [`.agent/skills/jira-mcp-v7/SKILL.md`](./.agent/skills/jira-mcp-v7/SKILL.md) that provides:
+**REQUIRED:** Read the agent skill at [`.agent/skills/jira-mcp-v7/SKILL.md`](./.agent/skills/jira-mcp-v7/SKILL.md) before using Jira tools. It provides:
 
 - **Complete JQL reference** - operators, fields, functions, and date syntax
 - **Critical gotchas** - `statusCategory` ("To Do") vs `status` vs `type` (Bug/Task)
