@@ -22,7 +22,9 @@ winget install -e --id OpenJS.NodeJS.LTS
 
 ---
 
-## 🚀 Quick Install
+## 🚀 Quick Install (For Humans)
+
+> **🤖 AI Agents:** Do NOT use this method. This requires interactive terminal input for credentials. See the [For AI Agents](#-for-ai-agents) section below for the automated workflow.
 
 Install using **mcpm** (MCP Manager) - a universal installer that works with all AI agents:
 
@@ -32,7 +34,7 @@ npx @khanglvm/mcpm https://github.com/khanglvm/jira-mcp
 
 **What this does:**
 - Auto-detects your installed AI agents (Claude Desktop, Cursor, VS Code, etc.)
-- Prompts for your Jira credentials securely
+- Prompts for your Jira credentials securely (interactive terminal input)
 - Transforms config to match each agent's format
 - Safely merges with existing configurations
 
