@@ -22,15 +22,44 @@ winget install -e --id OpenJS.NodeJS.LTS
 
 ---
 
-## 🚀 Quick Install
+## 🚀 Quick Install (Recommended)
 
-Run this single command to interactively configure Jira MCP for your AI tool:
+The fastest way to install is using **mcpm** (MCP Manager) - a universal installer that works with all AI agents:
+
+```bash
+npx @khanglvm/mcpm https://github.com/khanglvm/jira-mcp
+```
+
+**What this does:**
+- Auto-detects your installed AI agents (Claude Desktop, Cursor, VS Code, etc.)
+- Prompts for your Jira credentials securely
+- Transforms config to match each agent's format
+- Safely merges with existing configurations
+
+### Alternative: Bash Script
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/khanglvm/jira-mcp/main/scripts/install.sh)
 ```
 
-The installer auto-detects installed tools, supports multi-select, safely merges config, and creates backups.
+---
+
+## 🤖 For AI Agents
+
+This repository includes a skill guide at `.agent/skills/jira-mcp-v7/SKILL.md` that provides:
+
+- **Complete JQL reference** - operators, fields, functions, and date syntax
+- **Critical gotchas** - `statusCategory` ("To Do") vs `status` vs `type` (Bug/Task)
+- **Common patterns** - ready-to-use JQL queries
+- **Workflow guidance** - how to use transitions correctly
+
+**Key insight for AI agents:**
+```
+⚠️ "To Do" is a statusCategory, NOT an issue type!
+
+❌ type = "To Do"              → ERROR: "value does not exist"
+✅ statusCategory = "To Do"    → Works! Returns issues in "To Do" category
+```
 
 ---
 
