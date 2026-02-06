@@ -148,6 +148,14 @@ mcp_servers:
 | `JIRA_PASSWORD` | ✅ | Password |
 | `JIRA_API_VERSION` | ❌ | API version (default: `2`) |
 
+## 📜 Changelog
+
+### v1.4.0
+- `feat`: add `mcp.json` for `mcpm` tool support
+- `feat`: improve tool descriptions with JQL gotchas and add AI agent skill
+- `fix`: add `.mjs` extension for Node.js ESM compatibility in temporary files
+- `docs`: add `mcpm` quick install instructions and AI agent skill reference
+
 ---
 
 ## License
