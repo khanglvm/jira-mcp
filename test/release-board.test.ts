@@ -95,6 +95,8 @@ async function run(): Promise<void> {
     assert.deepEqual(result.issueKeys, ['BRAN-1', 'BRAN-2', 'BRAN-11']);
     assert.equal(result.completeness.complete, true);
     assert.equal(result.issues[0].children[0].key, 'BRAN-11');
+    assert.equal(Object.hasOwn(result.issues[0], 'description'), false);
+    assert.equal(Object.hasOwn(result.issues[0].children[0], 'description'), false);
 
     const definition = releaseToolDefinitions.find((tool) => tool.name === 'jira_get_release_board');
     assert.deepEqual(definition?.inputSchema.required, ['releaseBoard']);

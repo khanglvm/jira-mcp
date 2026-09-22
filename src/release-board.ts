@@ -8,7 +8,6 @@ import {
 
 export const RELEASE_ISSUE_FIELDS = [
     'summary',
-    'description',
     'status',
     'priority',
     'assignee',
@@ -43,7 +42,6 @@ export interface ReleaseBoardIssue {
     relationship: 'direct' | 'child' | 'parent';
     parentKey: string | null;
     summary: string | null;
-    description: string | null;
     issueType: string | null;
     subtask: boolean | null;
     status: string | null;
@@ -117,7 +115,6 @@ function normalizeIssue(
         relationship,
         parentKey: text(fields.parent?.key || parentKey),
         summary: text(fields.summary),
-        description: text(fields.description),
         issueType: text(fields.issuetype?.name),
         subtask: fields.issuetype?.subtask ?? null,
         status: text(fields.status?.name),
