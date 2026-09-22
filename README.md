@@ -143,6 +143,10 @@ type = "To Do"  → ERROR: "The value 'To Do' does not exist for the field 'type
 
 ## Changelog
 
+### v1.7.1
+- `security`: omit issue descriptions from aggregate release-board results so
+  embedded credentials or private payloads do not enter bulk agent output.
+
 ### v1.7.0
 - `feat`: add `jira_get_release_board` with URL validation, paginated release
   membership, hydrated subtasks, counts, and completeness evidence.
