@@ -46,6 +46,10 @@ export class JiraClient {
         ).toString('base64')}`;
     }
 
+    getBaseUrl(): string {
+        return this.config.JIRA_BASE_URL.replace(/\/$/, '');
+    }
+
     /**
      * Makes an authenticated request to the Jira API.
      * @param method - HTTP method
@@ -270,6 +274,24 @@ export class JiraClient {
         return this.request<JiraProject>('GET', `/project/${projectIdOrKey}`);
     }
 
+    async getVersion(versionId: string): Promise<JiraVersion> {
+        return this.request<JiraVersion>('GET', `/version/${encodeURIComponent(versionId)}`);
+    }
+
+    async getVersionUnresolvedIssueCount(versionId: string): Promise<JiraVersionUnresolvedCount> {
+        return this.request<JiraVersionUnresolvedCount>(
+            'GET',
+            `/version/${encodeURIComponent(versionId)}/unresolvedIssueCount`
+        );
+    }
+
+    async getVersionRelatedIssueCounts(versionId: string): Promise<JiraVersionRelatedCounts> {
+        return this.request<JiraVersionRelatedCounts>(
+            'GET',
+            `/version/${encodeURIComponent(versionId)}/relatedIssueCounts`
+        );
+    }
+
     // ============ User Methods ============
 
     /**
@@ -484,6 +506,28 @@ export interface JiraProject {
     projectTypeKey?: string;
     lead?: { displayName: string; name: string };
     description?: string;
+}
+
+export interface JiraVersion {
+    id: string;
+    name: string;
+    description?: string;
+    projectId: string | number;
+    startDate?: string;
+    releaseDate?: string;
+    released?: boolean;
+    archived?: boolean;
+    overdue?: boolean;
+}
+
+export interface JiraVersionUnresolvedCount {
+    issuesUnresolvedCount: number;
+}
+
+export interface JiraVersionRelatedCounts {
+    issuesFixedCount: number;
+    issuesAffectedCount: number;
+    issueCountWithCustomFieldsShowingVersion?: number;
 }
 
 /** Jira user structure */

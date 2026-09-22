@@ -8,6 +8,7 @@
  */
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { createRequire } from 'node:module';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
     CallToolRequestSchema,
@@ -33,6 +34,8 @@ import {
     userToolDefinitions,
     createAttachmentTools,
     attachmentToolDefinitions,
+    createReleaseTools,
+    releaseToolDefinitions,
 } from './tools/index.js';
 import {
     parseSetupArgs,
@@ -44,9 +47,11 @@ import {
 /**
  * Package information for server identification.
  */
+const require = createRequire(import.meta.url);
+const packageInfo = require('../package.json') as { version: string };
 const SERVER_INFO = {
     name: '@khanglvm/jira-mcp',
-    version: '1.0.0',
+    version: packageInfo.version,
 };
 
 /**
@@ -182,6 +187,7 @@ async function runMcpServer(): Promise<void> {
     const transitionTools = createTransitionTools(jiraClient);
     const userTools = createUserTools(jiraClient);
     const attachmentTools = createAttachmentTools(jiraClient);
+    const releaseTools = createReleaseTools(jiraClient);
 
     // Combine all tool handlers with type assertion
     // Individual handlers have stricter param types, but we know the SDK will provide correct args.
@@ -194,6 +200,7 @@ async function runMcpServer(): Promise<void> {
         ...transitionTools,
         ...userTools,
         ...attachmentTools,
+        ...releaseTools,
     };
 
     // Combine all tool definitions
@@ -204,6 +211,7 @@ async function runMcpServer(): Promise<void> {
         ...transitionToolDefinitions,
         ...userToolDefinitions,
         ...attachmentToolDefinitions,
+        ...releaseToolDefinitions,
     ];
 
     // Create MCP server

@@ -1,6 +1,6 @@
 {
     "name": "@khanglvm/jira-mcp",
-    "version": "1.6.1",
+    "version": "1.7.0",
     "description": "MCP server providing Jira tools with basic authentication support for legacy Jira Server (v7.x and older)",
     "type": "module",
     "main": "dist/index.js",
@@ -15,10 +15,12 @@
         "test": "npm run test:build && node dist-test/test/client.test.js",
         "test:tools": "npm run test:build && node dist-test/test/tools.test.js",
         "test:null": "npm run test:build && node dist-test/test/null-fields.test.js",
+        "test:release": "npm run test:build && node dist-test/test/release-board.test.js",
+        "test:unit": "npm run test:build && node dist-test/test/null-fields.test.js && node dist-test/test/release-board.test.js",
         "test:integration": "npm run test:build && node dist-test/test/integration.test.js",
         "test:build": "tsc -p tsconfig.test.json",
         "test:all": "npm run test:build && node dist-test/test/client.test.js && node dist-test/test/tools.test.js",
-        "prepublishOnly": "npm run build",
+        "prepublishOnly": "npm run test:unit && npm run build",
         "clean": "rm -rf dist dist-test"
     },
     "keywords": [
