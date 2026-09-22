@@ -55,7 +55,7 @@ jobs:
       - name: Validate package
         if: steps.release.outputs.validate == 'true'
         run: |
-          npm run test:null
+          npm run test:unit
           npm run build
           npm pack --dry-run --json
       - name: Publish with npm trusted publishing

@@ -9,3 +9,4 @@ export * from './projects.js';
 export * from './transitions.js';
 export * from './users.js';
 export * from './attachments.js';
+export * from './releases.js';

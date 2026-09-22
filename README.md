@@ -86,12 +86,19 @@ The skill provides:
 | `jira_search` | Search issues using JQL |
 | `jira_list_projects` | List all accessible projects |
 | `jira_get_project` | Get project details |
+| `jira_get_release_board` | Get a complete project release from a Jira version URL or id |
 | `jira_get_transitions` | Get available transitions |
 | `jira_transition_issue` | Transition issue to new status |
 | `jira_get_current_user` | Get authenticated user info |
 | `jira_get_user` | Get user by username |
 | `jira_list_attachments` | List attachments on an issue |
 | `jira_get_attachment` | Download an attachment (image inline, else temp file) |
+
+`jira_get_release_board` accepts links such as
+`https://jira.example.com/projects/PROJ/versions/12345`. It returns the version,
+all directly assigned issues, hydrated Jira subtasks, status counts, and
+completeness evidence in one call. It preserves tickets outside the caller's
+scope so product tooling can classify ownership explicitly.
 
 ---
 
@@ -135,6 +142,12 @@ type = "To Do"  → ERROR: "The value 'To Do' does not exist for the field 'type
 ---
 
 ## Changelog
+
+### v1.7.0
+- `feat`: add `jira_get_release_board` with URL validation, paginated release
+  membership, hydrated subtasks, counts, and completeness evidence.
+- `fix`: report the package version through MCP server metadata and `--version`.
+- `test`: run release-board and null-field offline contracts before publishing.
 
 ### v1.6.1
 - `fix`: null-guard all issue/search/transition/comment field rendering. `jira_get_issue` and `jira_search` no longer throw `Cannot read properties of undefined (reading 'name')` when a ticket has a null/absent `assignee`, `priority`, `status`, `issuetype`, `project`, transition `to`/`statusCategory`, or comment `author`. Missing values now normalize to `null`.
